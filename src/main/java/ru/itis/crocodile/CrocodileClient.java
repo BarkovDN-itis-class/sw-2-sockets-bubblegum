@@ -145,6 +145,9 @@ public class CrocodileClient extends Application {
             drawOnCanvas(message);
         } else if (message.startsWith("DRAW:DRAG:")) {
             drawOnCanvas(message);
+        } else if (message.equals("CLEAR_CANVAS")) {
+            GraphicsContext gc = canvas.getGraphicsContext2D();
+            gc.clearRect(0, 0, canvas.getWidth(), canvas.getHeight());
         } else {
             chatArea.appendText(message + "\n"); // Отображение сообщений чата
         }
@@ -184,8 +187,6 @@ public class CrocodileClient extends Application {
 
     private void clearCanvas() {
         writer.println("CLEAR_CANVAS");
-        GraphicsContext gc = canvas.getGraphicsContext2D();
-        gc.clearRect(0, 0, canvas.getWidth(), canvas.getHeight());
     }
 
     private void startRound() {
