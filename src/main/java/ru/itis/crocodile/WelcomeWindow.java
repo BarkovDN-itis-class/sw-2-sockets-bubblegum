@@ -26,7 +26,7 @@ public class WelcomeWindow extends Application {
         // Apply Bootstrap styles to the layout
         welcomeLayout.getStyleClass().addAll("p-4", "bg-light");
 
-        // Create an h1 label for the game title
+        // Create a h1 label for the game title
         Label gameTitle = new Label("Игра Крокодил");
         gameTitle.getStyleClass().add("h1");
 
