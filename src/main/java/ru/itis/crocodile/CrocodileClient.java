@@ -8,6 +8,7 @@ import javafx.scene.Scene;
 import javafx.scene.canvas.Canvas;
 import javafx.scene.canvas.GraphicsContext;
 import javafx.scene.control.Button;
+import javafx.scene.control.Label;
 import javafx.scene.control.TextArea;
 import javafx.scene.control.TextField;
 import javafx.scene.input.KeyCode;
@@ -19,6 +20,9 @@ import org.kordamp.bootstrapfx.BootstrapFX;
 
 import java.io.*;
 import java.net.Socket;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Random;
 
 public class CrocodileClient extends Application {
     private static final String SERVER_IP = "127.0.0.1"; // IP адрес сервера
@@ -68,8 +72,6 @@ public class CrocodileClient extends Application {
             sendMessage("DRAW:DRAG:" + e.getX() + ":" + e.getY());
         });
 
-
-
         canvas.setFocusTraversable(true); // Enable keyboard events on the canvas
 
         BorderPane root = new BorderPane();
@@ -98,18 +100,34 @@ public class CrocodileClient extends Application {
         startRoundButton.setOnAction(e -> startRound());
         endGameButton.setOnAction(e -> endGame());
 
+        // Добавление лейбла для отображения случайного слова
+        Label wordLabel = new Label();
+        wordLabel.getStyleClass().add("h1");
+
+        // Проверка, содержится ли уже wordLabel в chatBox
+        if (!chatBox.getChildren().contains(wordLabel)) {
+            // Получение списка слов из файла words.txt
+            List<String> wordsList = readWordsFromFile("words.txt");
+
+            // Установка случайного слова в лейбл
+            setRandomWord(wordLabel, wordsList);
+
+            // Добавление лейбла в интерфейс
+            chatBox.getChildren().addAll(chatArea, messageInput, sendButton, wordLabel);
+        }
 
         HBox buttonsBox = new HBox(10);
         buttonsBox.setAlignment(Pos.CENTER);
         buttonsBox.getChildren().addAll(startRoundButton, endGameButton);
 
         VBox canvasAndButtons = new VBox(10);
-        canvasAndButtons.getChildren().addAll(canvas, buttonsBox);
-        chatBox.getChildren().addAll(chatArea, messageInput, sendButton);
+        canvasAndButtons.getChildren().addAll(wordLabel, canvas, buttonsBox);
+        canvasAndButtons.setAlignment(Pos.CENTER);
+
         root.setCenter(canvasAndButtons);
         root.setRight(chatBox);
 
-        Scene scene = new Scene(root, 1000, 450);
+        Scene scene = new Scene(root, 1000, 500);
 
         // Apply BootstrapFX style to the scene
         scene.getStylesheets().add(BootstrapFX.bootstrapFXStylesheet());
@@ -127,6 +145,7 @@ public class CrocodileClient extends Application {
 
         connectToServer();
     }
+
 
     private void connectToServer() {
         try {
@@ -200,6 +219,34 @@ public class CrocodileClient extends Application {
 
     private void clearCanvas() {
         writer.println("CLEAR_CANVAS");
+    }
+
+    private List<String> readWordsFromFile(String filename) {
+        List<String> wordsList = new ArrayList<>();
+
+        try (InputStream inputStream = getClass().getClassLoader().getResourceAsStream(filename);
+             InputStreamReader inputStreamReader = new InputStreamReader(inputStream);
+             BufferedReader br = new BufferedReader(inputStreamReader)) {
+
+            String line;
+            while ((line = br.readLine()) != null) {
+                wordsList.add(line.trim());
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
+        return wordsList;
+    }
+
+    // Метод для установки случайного слова в лейбл
+    private void setRandomWord(Label wordLabel, List<String> wordsList) {
+        if (!wordsList.isEmpty()) {
+            Random random = new Random();
+            int randomIndex = random.nextInt(wordsList.size());
+            String randomWord = wordsList.get(randomIndex);
+            wordLabel.setText("Word: " + randomWord);
+        }
     }
 
     private void startRound() {
