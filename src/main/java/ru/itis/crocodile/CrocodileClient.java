@@ -17,6 +17,12 @@ import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
 import org.kordamp.bootstrapfx.BootstrapFX;
+import javafx.animation.KeyFrame;
+import javafx.animation.Timeline;
+import javafx.event.ActionEvent;
+import javafx.event.EventHandler;
+import javafx.util.Duration;
+
 
 import java.io.*;
 import java.net.Socket;
@@ -34,6 +40,10 @@ public class CrocodileClient extends Application {
     private TextArea chatArea;
     private TextField messageInput;
     private Canvas canvas;
+    private Timeline timer;
+    private Label wordLabel;
+    private Label timerLabel;
+    private int secondsRemaining;
 
     public CrocodileClient(int numberOfRounds, String roomCode) {
         // Logic for creating a new room goes here
@@ -100,9 +110,11 @@ public class CrocodileClient extends Application {
         startRoundButton.setOnAction(e -> startRound());
         endGameButton.setOnAction(e -> endGame());
 
-        // Добавление лейбла для отображения случайного слова
-        Label wordLabel = new Label();
+        wordLabel = new Label();
         wordLabel.getStyleClass().add("h1");
+
+        timerLabel = new Label();
+        timerLabel.getStyleClass().add("h1");
 
         // Проверка, содержится ли уже wordLabel в chatBox
         if (!chatBox.getChildren().contains(wordLabel)) {
@@ -113,8 +125,25 @@ public class CrocodileClient extends Application {
             setRandomWord(wordLabel, wordsList);
 
             // Добавление лейбла в интерфейс
-            chatBox.getChildren().addAll(chatArea, messageInput, sendButton, wordLabel);
+            chatBox.getChildren().addAll(chatArea, messageInput, sendButton, wordLabel, timerLabel);
         }
+
+        // Инициализация таймера для обновления слова каждые 60 секунд
+        secondsRemaining = 60;
+        timer = new Timeline(new KeyFrame(Duration.seconds(1), new EventHandler<ActionEvent>() {
+            @Override
+            public void handle(ActionEvent event) {
+                secondsRemaining--;
+                Platform.runLater(() -> updateTimerLabel());
+
+                if (secondsRemaining <= 0) {
+                    Platform.runLater(() -> updateWord());
+                    secondsRemaining = 60;
+                }
+            }
+        }));
+        timer.setCycleCount(Timeline.INDEFINITE);
+        timer.play();
 
         HBox buttonsBox = new HBox(10);
         buttonsBox.setAlignment(Pos.CENTER);
@@ -144,6 +173,15 @@ public class CrocodileClient extends Application {
         primaryStage.show();
 
         connectToServer();
+    }
+
+    private void updateTimerLabel() {
+        timerLabel.setText("Time left: " + secondsRemaining + "s");
+    }
+
+    private void updateWord() {
+        List<String> wordsList = readWordsFromFile("words.txt");
+        setRandomWord(wordLabel, wordsList);
     }
 
 
@@ -250,6 +288,13 @@ public class CrocodileClient extends Application {
     }
 
     private void startRound() {
+        timer.stop();
+        secondsRemaining = 60;
+        updateWord();
+        updateTimerLabel();
+
+        // Запуск таймера снова
+        timer.play();
         // Logic for starting a round goes here
         // You can add your implementation for starting a new round
         // This might involve clearing the canvas, resetting the game state, etc.
