@@ -31,6 +31,19 @@ public class CrocodileClient extends Application {
     private TextField messageInput;
     private Canvas canvas;
 
+    public CrocodileClient(int numberOfRounds, String roomCode) {
+        // Logic for creating a new room goes here
+        // You can add your implementation for creating a new room
+        // This might involve sending a message to the server, etc.
+        // For example, you can call a method to send a message to the server
+    }
+    public CrocodileClient(String roomCode) {
+        // Logic for creating a new room goes here
+        // You can add your implementation for creating a new room
+        // This might involve sending a message to the server, etc.
+        // For example, you can call a method to send a message to the server
+    }
+
     public static void main(String[] args) {
         launch(args);
     }

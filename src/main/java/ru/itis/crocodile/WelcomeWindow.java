@@ -13,14 +13,14 @@ import javafx.stage.Stage;
 import org.kordamp.bootstrapfx.BootstrapFX;
 
 public class WelcomeWindow extends Application {
-
+    private VBox welcomeLayout;
     public static void main(String[] args) {
         launch(args);
     }
 
     @Override
     public void start(Stage primaryStage) {
-        VBox welcomeLayout = new VBox(10);
+        welcomeLayout = new VBox(10);
         welcomeLayout.setAlignment(Pos.CENTER);
 
         // Apply Bootstrap styles to the layout
@@ -46,7 +46,7 @@ public class WelcomeWindow extends Application {
         joinButton.setOnAction(e -> {
             String joinCode = joinCodeField.getText();
             // Join room logic using the entered code
-            System.out.println("Присоединение к комнате с кодом: " + joinCode);
+            joinRoom(joinCode);
         });
 
         // Button to create a new room
@@ -76,7 +76,17 @@ public class WelcomeWindow extends Application {
     }
 
     private void createNewRoom(int numberOfRounds) {
-        // Logic to create a new room with the selected number of rounds
-        System.out.println("Создание новой комнаты с количеством раундов: " + numberOfRounds);
+        // open CrocodileClient window with the selected number of rounds
+        String roomCode = "123456";
+        CrocodileClient crocodileClient = new CrocodileClient(numberOfRounds, roomCode);
+        Stage stage = new Stage();
+        crocodileClient.start(stage);
+    }
+
+    // open CrocodileClient with roomCode
+    private void joinRoom(String roomCode) {
+        CrocodileClient crocodileClient = new CrocodileClient(roomCode);
+        Stage stage = new Stage();
+        crocodileClient.start(stage);
     }
 }
