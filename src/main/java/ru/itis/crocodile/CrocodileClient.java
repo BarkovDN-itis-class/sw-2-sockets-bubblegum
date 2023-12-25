@@ -45,17 +45,12 @@ public class CrocodileClient extends Application {
     private Label timerLabel;
     private int secondsRemaining;
 
-    public CrocodileClient(int numberOfRounds, String roomCode) {
-        // Logic for creating a new room goes here
-        // You can add your implementation for creating a new room
-        // This might involve sending a message to the server, etc.
-        // For example, you can call a method to send a message to the server
-    }
-    public CrocodileClient(String roomCode) {
-        // Logic for creating a new room goes here
-        // You can add your implementation for creating a new room
-        // This might involve sending a message to the server, etc.
-        // For example, you can call a method to send a message to the server
+    private Socket socket; // Добавляем поле для хранения сокета
+
+    public CrocodileClient(String roomCode, Socket socket) {
+        this.socket = socket; // Сохраняем переданный сокет
+        connectToServer(); // Вызываем метод подключения к серверу
+        sendMessage("JOIN_ROOM:" + roomCode); // Отправляем команду на подключение к комнате
     }
 
     public static void main(String[] args) {
@@ -64,10 +59,9 @@ public class CrocodileClient extends Application {
 
     @Override
     public void start(Stage primaryStage) {
-        // Create a canvas
         canvas = new Canvas(400, 400);
         GraphicsContext gc = canvas.getGraphicsContext2D();
-        gc.setLineWidth(2); // Set the line width
+        gc.setLineWidth(2);
 
         canvas.setOnMousePressed(e -> {
             gc.beginPath();
@@ -99,7 +93,6 @@ public class CrocodileClient extends Application {
         Button startRoundButton = new Button("Start Round");
         Button endGameButton = new Button("End Game");
 
-        // Apply BootstrapFX styles to components
         chatArea.getStyleClass().add("form-control");
         messageInput.getStyleClass().add("form-control");
         sendButton.getStyleClass().setAll("btn", "btn-primary");
@@ -164,7 +157,7 @@ public class CrocodileClient extends Application {
         // Handle clearing the canvas on "C" key press
         scene.setOnKeyPressed(e -> {
             if (e.getCode() == KeyCode.C) {
-                clearCanvas(); // Очистка холста и отправка сообщения о чистке
+                clearCanvas();
             }
         });
 
@@ -186,30 +179,30 @@ public class CrocodileClient extends Application {
 
 
     private void connectToServer() {
-        try {
-            Socket socket = new Socket(SERVER_IP, SERVER_PORT);
-            writer = new PrintWriter(socket.getOutputStream(), true);
-            reader = new BufferedReader(new InputStreamReader(socket.getInputStream()));
+        if (socket != null && socket.isConnected()) {
+            try {
+                writer = new PrintWriter(socket.getOutputStream(), true);
+                reader = new BufferedReader(new InputStreamReader(socket.getInputStream()));
 
-
-            Thread readerThread = new Thread(() -> {
-                try {
-                    while (true) {
-                        String message = reader.readLine();
-                        if (message != null) {
-                            Platform.runLater(() -> processMessage(message)); // Обработка полученного сообщения
+                Thread readerThread = new Thread(() -> {
+                    try {
+                        while (true) {
+                            String message = reader.readLine();
+                            if (message != null) {
+                                Platform.runLater(() -> processMessage(message));
+                            }
                         }
+                    } catch (IOException e) {
+                        e.printStackTrace();
                     }
-                } catch (IOException e) {
-                    e.printStackTrace();
-                }
-            });
-            readerThread.start();
-
-        } catch (IOException e) {
-            e.printStackTrace();
+                });
+                readerThread.start();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
         }
     }
+
     private void processMessage(String message) {
         if (message.startsWith("DRAW:PRESS:")) {
             drawOnCanvas(message);
@@ -224,7 +217,6 @@ public class CrocodileClient extends Application {
     }
 
     private void drawOnCanvas(String message) {
-        // Разбор сообщения для получения координат рисования
         String[] parts = message.split(":");
         if (parts.length == 4) {
             double x = Double.parseDouble(parts[2]);
@@ -241,6 +233,7 @@ public class CrocodileClient extends Application {
             }
         }
     }
+
     private void sendMessage() {
         String message = messageInput.getText();
         if (!message.isEmpty()) {
@@ -248,14 +241,18 @@ public class CrocodileClient extends Application {
             messageInput.clear();
         }
     }
+
     private void sendMessage(String message) {
         writer.println(message);
     }
+
     public GraphicsContext getCanvasGraphicsContext() {
         return canvas.getGraphicsContext2D();
     }
 
     private void clearCanvas() {
+        GraphicsContext gc = canvas.getGraphicsContext2D();
+        gc.clearRect(0, 0, canvas.getWidth(), canvas.getHeight());
         writer.println("CLEAR_CANVAS");
     }
 
@@ -288,6 +285,7 @@ public class CrocodileClient extends Application {
     }
 
     private void startRound() {
+        // Logic for starting a round
         timer.stop();
         secondsRemaining = 60;
         updateWord();
@@ -302,9 +300,6 @@ public class CrocodileClient extends Application {
     }
 
     private void endGame() {
-        // Logic for ending the game goes here
-        // You can add your implementation for ending the game
-        // This might involve closing the connections, displaying scores, etc.
-        // For example, you can call a method to close the connections and clean up
+        // Logic for ending the game
     }
 }

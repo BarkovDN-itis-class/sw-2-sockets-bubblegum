@@ -5,8 +5,7 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.PrintWriter;
 import java.net.Socket;
-import java.util.HashSet;
-import java.util.Set;
+import java.util.*;
 
 public class Handler extends Thread {
     private Socket socket;
@@ -18,6 +17,7 @@ public class Handler extends Thread {
     public Handler(Socket socket) {
         this.socket = socket;
     }
+    private static final Map<String, Room> rooms = new HashMap<>();
 
     public void run() {
         try {
@@ -32,10 +32,12 @@ public class Handler extends Thread {
                 }
                 System.out.println("Received: " + message);
 
-                if (message.startsWith("DRAW:")) {
+                if (message.startsWith("GENERATE_ROOM_CODE:")) {
+                    handleRoomCreation(message);
+                } else if (message.startsWith("JOIN_ROOM:")) {
+                    handleRoomJoining(message, writer);
+                } else if (message.startsWith("DRAW:")) {
                     broadcast(message, writer);
-                } else if (message.equals("CLEAR_CANVAS")) {
-                    clearCanvasForAll();
                 } else {
                     broadcast(message, null);
                 }
@@ -65,6 +67,48 @@ public class Handler extends Thread {
     private void clearCanvasForAll() {
         for (PrintWriter writer : writers) {
             writer.println("CLEAR_CANVAS");
+        }
+    }
+
+    private void handleRoomCreation(String message) {
+        // Получение параметров из сообщения (например, количество раундов)
+        String[] parts = message.split(":");
+        if (parts.length >= 2) {
+            int numberOfRounds = Integer.parseInt(parts[1]);
+            // Создание новой комнаты и генерация уникального кода
+            String roomCode = generateUniqueRoomCode();
+            Room newRoom = new Room(numberOfRounds);
+            rooms.put(roomCode, newRoom);
+            // Отправка кода комнаты клиенту
+            writer.println("ROOM_CREATED:" + roomCode);
+        }
+    }
+
+    private String generateUniqueRoomCode() {
+        // Generate a random 4-digit room code
+        Random random = new Random();
+        StringBuilder code = new StringBuilder();
+        for (int i = 0; i < 6; i++) {
+            code.append(random.nextInt(10)); // Appending a random digit (0-9)
+        }
+        System.out.println(code);
+        return code.toString();
+    }
+
+    private void handleRoomJoining(String message, PrintWriter sender) {
+        // Получение параметров из сообщения (например, код комнаты)
+        String[] parts = message.split(":");
+        if (parts.length >= 2) {
+            String roomCode = parts[1];
+            // Проверка наличия комнаты по указанному коду
+            Room roomToJoin = rooms.get(roomCode);
+            if (roomToJoin != null) {
+                // Добавление клиента в комнату или выполнение других действий по присоединению
+                // Например: roomToJoin.addPlayer(sender);
+                writer.println("JOINED_ROOM:" + roomCode);
+            } else {
+                writer.println("ROOM_NOT_FOUND");
+            }
         }
     }
 }
