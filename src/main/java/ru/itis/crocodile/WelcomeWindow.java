@@ -76,14 +76,11 @@ public class WelcomeWindow extends Application {
     }
 
     private void createNewRoom(int numberOfRounds) {
-        // open CrocodileClient window with the selected number of rounds
-        String roomCode = "123456";
         CrocodileClient crocodileClient = new CrocodileClient(true);
         Stage stage = new Stage();
         crocodileClient.start(stage);
     }
 
-    // open CrocodileClient with roomCode
     private void joinRoom(String roomCode) {
         CrocodileClient crocodileClient = new CrocodileClient(false);
         Stage stage = new Stage();
