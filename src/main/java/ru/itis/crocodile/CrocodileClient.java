@@ -33,6 +33,7 @@ import java.util.Random;
 public class CrocodileClient extends Application {
     private static final String SERVER_IP = "127.0.0.1"; // IP адрес сервера
     private static final int SERVER_PORT = 5000; // Порт сервера
+    private boolean isLeader;
 
     private PrintWriter writer;
     private BufferedReader reader;
@@ -44,18 +45,8 @@ public class CrocodileClient extends Application {
     private Label wordLabel;
     private Label timerLabel;
     private int secondsRemaining;
-
-    public CrocodileClient(int numberOfRounds, String roomCode) {
-        // Logic for creating a new room goes here
-        // You can add your implementation for creating a new room
-        // This might involve sending a message to the server, etc.
-        // For example, you can call a method to send a message to the server
-    }
-    public CrocodileClient(String roomCode) {
-        // Logic for creating a new room goes here
-        // You can add your implementation for creating a new room
-        // This might involve sending a message to the server, etc.
-        // For example, you can call a method to send a message to the server
+    public CrocodileClient(boolean isLeader) {
+        this.isLeader = isLeader;
     }
 
     public static void main(String[] args) {
@@ -123,9 +114,11 @@ public class CrocodileClient extends Application {
 
             // Установка случайного слова в лейбл
             setRandomWord(wordLabel, wordsList);
-
             // Добавление лейбла в интерфейс
             chatBox.getChildren().addAll(chatArea, messageInput, sendButton, wordLabel, timerLabel);
+            if (!isLeader) {
+                wordLabel.setVisible(false);
+            }
         }
 
         // Инициализация таймера для обновления слова каждые 60 секунд
@@ -242,10 +235,12 @@ public class CrocodileClient extends Application {
         }
     }
     private void sendMessage() {
-        String message = messageInput.getText();
-        if (!message.isEmpty()) {
-            writer.println(message);
-            messageInput.clear();
+        if (!isLeader) {
+            String message = messageInput.getText();
+            if (!message.isEmpty()) {
+                writer.println(message);
+                messageInput.clear();
+            }
         }
     }
     private void sendMessage(String message) {
