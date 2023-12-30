@@ -47,6 +47,7 @@ public class CrocodileClient extends Application {
     private Label wordLabel;
     private Label timerLabel;
     private int secondsRemaining;
+    private String currentWord;
     public CrocodileClient(boolean isLeader) {
         this.isLeader = isLeader;
     }
@@ -226,6 +227,11 @@ public class CrocodileClient extends Application {
             if (readyPlayerCount >= REQUIRED_PLAYERS_COUNT) {
                 startGame();
             }
+        } else if (message.equals("WORD_MATCH")) {
+            // Обработка совпадения слова
+            updateWord();
+            secondsRemaining = 60;
+            updateTimerLabel();
         } else {
             chatArea.appendText(message + "\n"); // Отображение сообщений чата
         }
@@ -253,11 +259,13 @@ public class CrocodileClient extends Application {
         if (!isLeader) {
             String message = messageInput.getText();
             if (!message.isEmpty()) {
+                checkWordMatch(message); // Проверка на совпадение перед отправкой сообщения
                 writer.println(message);
                 messageInput.clear();
             }
         }
     }
+
     private void sendMessage(String message) {
         writer.println(message);
     }
@@ -292,8 +300,8 @@ public class CrocodileClient extends Application {
         if (!wordsList.isEmpty()) {
             Random random = new Random();
             int randomIndex = random.nextInt(wordsList.size());
-            String randomWord = wordsList.get(randomIndex);
-            wordLabel.setText("Word: " + randomWord);
+            currentWord = wordsList.get(randomIndex);
+            wordLabel.setText("Word: " + currentWord);
         }
     }
 
@@ -322,4 +330,19 @@ public class CrocodileClient extends Application {
             Platform.exit();
         }
     }
+
+    private void checkWordMatch(String enteredWord) {
+        if (enteredWord.equalsIgnoreCase(currentWord)) {
+            // Отправить сообщение о совпадении слова
+            sendMessage("WORD_MATCH");
+
+            // Обновить слово для всех игроков
+            updateWord();
+
+            // Сбросить таймер
+            secondsRemaining = 60;
+            updateTimerLabel();
+        }
+    }
+
 }
