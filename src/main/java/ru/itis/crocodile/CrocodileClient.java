@@ -33,6 +33,8 @@ import java.util.Random;
 public class CrocodileClient extends Application {
     private static final String SERVER_IP = "127.0.0.1"; // IP адрес сервера
     private static final int SERVER_PORT = 5000; // Порт сервера
+    private int readyPlayerCount = 0;
+    private final int REQUIRED_PLAYERS_COUNT = 3;
     private boolean isLeader;
 
     private PrintWriter writer;
@@ -87,18 +89,22 @@ public class CrocodileClient extends Application {
         messageInput.setPromptText("Type your message...");
 
         Button sendButton = new Button("Send");
-        Button startRoundButton = new Button("Start Round");
+        Button readyButton = new Button("Ready!");
         Button endGameButton = new Button("End Game");
 
         // Apply BootstrapFX styles to components
         chatArea.getStyleClass().add("form-control");
         messageInput.getStyleClass().add("form-control");
         sendButton.getStyleClass().setAll("btn", "btn-primary");
-        startRoundButton.getStyleClass().setAll("btn", "btn-success");
+        readyButton.getStyleClass().setAll("btn", "btn-success");
         endGameButton.getStyleClass().setAll("btn", "btn-danger");
 
+        if (!isLeader) {
+            endGameButton.setVisible(false);
+        }
+
         sendButton.setOnAction(e -> sendMessage());
-        startRoundButton.setOnAction(e -> startRound());
+        readyButton.setOnAction(e -> startRound());
         endGameButton.setOnAction(e -> endGame());
 
         wordLabel = new Label();
@@ -136,11 +142,11 @@ public class CrocodileClient extends Application {
             }
         }));
         timer.setCycleCount(Timeline.INDEFINITE);
-        timer.play();
+//        timer.play();
 
         HBox buttonsBox = new HBox(10);
         buttonsBox.setAlignment(Pos.CENTER);
-        buttonsBox.getChildren().addAll(startRoundButton, endGameButton);
+        buttonsBox.getChildren().addAll(readyButton, endGameButton);
 
         VBox canvasAndButtons = new VBox(10);
         canvasAndButtons.getChildren().addAll(wordLabel, canvas, buttonsBox);
@@ -211,6 +217,11 @@ public class CrocodileClient extends Application {
         } else if (message.equals("CLEAR_CANVAS")) {
             GraphicsContext gc = canvas.getGraphicsContext2D();
             gc.clearRect(0, 0, canvas.getWidth(), canvas.getHeight());
+        } else if (message.equals("READY")) {
+            readyPlayerCount++;
+            if (readyPlayerCount >= REQUIRED_PLAYERS_COUNT) {
+                startGame();
+            }
         } else {
             chatArea.appendText(message + "\n"); // Отображение сообщений чата
         }
@@ -283,6 +294,13 @@ public class CrocodileClient extends Application {
     }
 
     private void startRound() {
+        sendMessage("READY");
+        // Logic for starting a round goes here
+        // You can add your implementation for starting a new round
+        // This might involve clearing the canvas, resetting the game state, etc.
+        // For example, you can call a method to reset the canvas and game state
+    }
+    private void startGame() {
         timer.stop();
         secondsRemaining = 60;
         updateWord();
@@ -290,16 +308,14 @@ public class CrocodileClient extends Application {
 
         // Запуск таймера снова
         timer.play();
-        // Logic for starting a round goes here
-        // You can add your implementation for starting a new round
-        // This might involve clearing the canvas, resetting the game state, etc.
-        // For example, you can call a method to reset the canvas and game state
     }
-
     private void endGame() {
-        // Logic for ending the game goes here
-        // You can add your implementation for ending the game
-        // This might involve closing the connections, displaying scores, etc.
-        // For example, you can call a method to close the connections and clean up
+        if (isLeader) {
+            // Отправка сообщения о завершении игры всем игрокам
+            sendMessage("END_GAME");
+
+            // Логика закрытия соединения и окна игры
+            Platform.exit();
+        }
     }
 }
