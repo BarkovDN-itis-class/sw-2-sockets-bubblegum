@@ -63,16 +63,20 @@ public class CrocodileClient extends Application {
         gc.setLineWidth(2); // Set the line width
 
         canvas.setOnMousePressed(e -> {
-            gc.beginPath();
-            gc.lineTo(e.getX(), e.getY());
-            gc.stroke();
-            sendMessage("DRAW:PRESS:" + e.getX() + ":" + e.getY());
+            if (isLeader) {
+                gc.beginPath();
+                gc.lineTo(e.getX(), e.getY());
+                gc.stroke();
+                sendMessage("DRAW:PRESS:" + e.getX() + ":" + e.getY());
+            }
         });
 
         canvas.setOnMouseDragged(e -> {
-            gc.lineTo(e.getX(), e.getY());
-            gc.stroke();
-            sendMessage("DRAW:DRAG:" + e.getX() + ":" + e.getY());
+            if (isLeader) {
+                gc.lineTo(e.getX(), e.getY());
+                gc.stroke();
+                sendMessage("DRAW:DRAG:" + e.getX() + ":" + e.getY());
+            }
         });
 
         canvas.setFocusTraversable(true); // Enable keyboard events on the canvas
@@ -162,7 +166,7 @@ public class CrocodileClient extends Application {
 
         // Handle clearing the canvas on "C" key press
         scene.setOnKeyPressed(e -> {
-            if (e.getCode() == KeyCode.C) {
+            if (e.getCode() == KeyCode.C && isLeader) {
                 clearCanvas(); // Очистка холста и отправка сообщения о чистке
             }
         });
@@ -210,9 +214,9 @@ public class CrocodileClient extends Application {
         }
     }
     private void processMessage(String message) {
-        if (message.startsWith("DRAW:PRESS:")) {
+        if (message.startsWith("DRAW:PRESS:") && !isLeader) {
             drawOnCanvas(message);
-        } else if (message.startsWith("DRAW:DRAG:")) {
+        } else if (message.startsWith("DRAW:DRAG:") && !isLeader) {
             drawOnCanvas(message);
         } else if (message.equals("CLEAR_CANVAS")) {
             GraphicsContext gc = canvas.getGraphicsContext2D();
