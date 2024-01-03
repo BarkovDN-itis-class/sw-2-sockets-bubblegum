@@ -332,7 +332,7 @@ public class CrocodileClient extends Application {
     }
 
     private void checkWordMatch(String enteredWord) {
-        if (enteredWord.equalsIgnoreCase(currentWord)) {
+        if (enteredWord.equals(currentWord)) {
             // Отправить сообщение о совпадении слова
             sendMessage("WORD_MATCH");
 
