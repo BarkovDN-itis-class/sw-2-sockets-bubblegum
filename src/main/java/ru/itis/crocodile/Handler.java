@@ -68,10 +68,10 @@ public class Handler extends Thread {
                 writer.println(message);
             }
         }
-
-        if (sender != null) {
-            sender.println(message);
-        }
+        // ?!
+//        if (sender != null) {
+//            sender.println(message);
+//        }
     }
 
     private void clearCanvasForAll() {
