@@ -31,7 +31,6 @@ public class Handler extends Thread {
             }
             playerNames.add(playerName);
 
-            // Отправка сообщения о присоединении в чат
             broadcast(playerName + " joined the game", writer);
 
             while (true) {

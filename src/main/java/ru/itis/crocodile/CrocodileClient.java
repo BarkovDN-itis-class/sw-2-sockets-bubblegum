@@ -58,10 +58,9 @@ public class CrocodileClient extends Application {
 
     @Override
     public void start(Stage primaryStage) {
-        // Create a canvas
         canvas = new Canvas(400, 400);
         GraphicsContext gc = canvas.getGraphicsContext2D();
-        gc.setLineWidth(2); // Set the line width
+        gc.setLineWidth(2);
 
         canvas.setOnMousePressed(e -> {
             if (isLeader) {
@@ -80,7 +79,7 @@ public class CrocodileClient extends Application {
             }
         });
 
-        canvas.setFocusTraversable(true); // Enable keyboard events on the canvas
+        canvas.setFocusTraversable(true);
 
         BorderPane root = new BorderPane();
         VBox chatBox = new VBox(10);
@@ -97,7 +96,6 @@ public class CrocodileClient extends Application {
         Button readyButton = new Button("Ready!");
         Button endGameButton = new Button("End Game");
 
-        // Apply BootstrapFX styles to components
         chatArea.getStyleClass().add("form-control");
         messageInput.getStyleClass().add("form-control");
         sendButton.getStyleClass().setAll("btn", "btn-primary");
@@ -123,7 +121,6 @@ public class CrocodileClient extends Application {
             // Получение списка слов из файла words.txt
             List<String> wordsList = readWordsFromFile("words.txt");
 
-            // Установка случайного слова в лейбл
             setRandomWord(wordLabel, wordsList);
             // Добавление лейбла в интерфейс
             chatBox.getChildren().addAll(chatArea, messageInput, sendButton, wordLabel, timerLabel);
@@ -147,7 +144,6 @@ public class CrocodileClient extends Application {
             }
         }));
         timer.setCycleCount(Timeline.INDEFINITE);
-//        timer.play();
 
         HBox buttonsBox = new HBox(10);
         buttonsBox.setAlignment(Pos.CENTER);
@@ -162,10 +158,8 @@ public class CrocodileClient extends Application {
 
         Scene scene = new Scene(root, 1000, 500);
 
-        // Apply BootstrapFX style to the scene
         scene.getStylesheets().add(BootstrapFX.bootstrapFXStylesheet());
 
-        // Handle clearing the canvas on "C" key press
         scene.setOnKeyPressed(e -> {
             if (e.getCode() == KeyCode.C && isLeader) {
                 clearCanvas(); // Очистка холста и отправка сообщения о чистке
@@ -255,6 +249,7 @@ public class CrocodileClient extends Application {
             }
         }
     }
+
     private void sendMessage() {
         if (!isLeader) {
             String message = messageInput.getText();
@@ -295,7 +290,6 @@ public class CrocodileClient extends Application {
         return wordsList;
     }
 
-    // Метод для установки случайного слова в лейбл
     private void setRandomWord(Label wordLabel, List<String> wordsList) {
         if (!wordsList.isEmpty()) {
             Random random = new Random();
@@ -307,10 +301,6 @@ public class CrocodileClient extends Application {
 
     private void startRound() {
         sendMessage("READY");
-        // Logic for starting a round goes here
-        // You can add your implementation for starting a new round
-        // This might involve clearing the canvas, resetting the game state, etc.
-        // For example, you can call a method to reset the canvas and game state
     }
     private void startGame() {
         timer.stop();
@@ -321,6 +311,7 @@ public class CrocodileClient extends Application {
         // Запуск таймера снова
         timer.play();
     }
+
     private void endGame() {
         if (isLeader) {
             // Отправка сообщения о завершении игры всем игрокам

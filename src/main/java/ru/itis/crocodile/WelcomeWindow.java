@@ -23,38 +23,30 @@ public class WelcomeWindow extends Application {
         welcomeLayout = new VBox(10);
         welcomeLayout.setAlignment(Pos.CENTER);
 
-        // Apply Bootstrap styles to the layout
         welcomeLayout.getStyleClass().addAll("p-4", "bg-light");
 
-        // Create a h1 label for the game title
         Label gameTitle = new Label("Игра Крокодил");
         gameTitle.getStyleClass().add("h1");
 
-        // Spinner to select the number of rounds
         Spinner<Integer> roundsSpinner = new Spinner<>();
         roundsSpinner.setValueFactory(new SpinnerValueFactory.IntegerSpinnerValueFactory(1, 10, 1));
 
-        // Field for entering the room code
         TextField joinCodeField = new TextField();
         joinCodeField.setMaxWidth(200);
         joinCodeField.setPromptText("Введите код для подключения");
         joinCodeField.getStyleClass().addAll("form-control");
 
-        // Button to join the room by code
         Button joinButton = new Button("Присоединиться к комнате");
         joinButton.getStyleClass().addAll("btn", "btn-primary");
         joinButton.setOnAction(e -> {
             String joinCode = joinCodeField.getText();
-            // Join room logic using the entered code
             joinRoom(joinCode);
         });
 
-        // Button to create a new room
         Button createRoomButton = new Button("Создать новую комнату");
         createRoomButton.getStyleClass().addAll("btn", "btn-success");
         createRoomButton.setOnAction(e -> {
             int numberOfRounds = roundsSpinner.getValue();
-            // Logic to create a new room with the selected number of rounds
             createNewRoom(numberOfRounds);
         });
 
@@ -69,7 +61,7 @@ public class WelcomeWindow extends Application {
         );
 
         Scene welcomeScene = new Scene(welcomeLayout, 400, 350);
-        welcomeScene.getStylesheets().add(BootstrapFX.bootstrapFXStylesheet()); // Apply BootstrapFX styles
+        welcomeScene.getStylesheets().add(BootstrapFX.bootstrapFXStylesheet());
         primaryStage.setScene(welcomeScene);
         primaryStage.setTitle("Welcome");
         primaryStage.show();
